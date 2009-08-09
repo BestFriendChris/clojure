@@ -10,7 +10,7 @@
 ;see Huet
 
 (ns clojure.zip
-    (:refer-clojure :exclude (replace remove next)))
+    (:refer-clojure :exclude (replace remove next last)))
 
 (defn zipper
   "Creates a new zipper structure. 
@@ -138,7 +138,7 @@
   [loc]
     (let [[node {l :l r :r :as path}] loc]
       (if (and path r)
-        (with-meta [(last r) (assoc path :l (apply conj l node (butlast r)) :r nil)] ^loc)
+        (with-meta [(clojure.core/last r) (assoc path :l (apply conj l node (butlast r)) :r nil)] ^loc)
         loc)))
 
 (defn left
@@ -222,6 +222,13 @@
           (recur (rightmost child))
           loc))
       (up loc)))
+
+(defn last
+  "Moves to the last loc in the hierarchy. Allows clojure.zip/prev to walk the entire tree"
+  [loc]
+    (if-let [child (and (branch? loc) (down loc))]
+      (recur (rightmost child))
+      loc))
 
 (defn end?
   "Returns true if loc represents the end of a depth-first walk"
